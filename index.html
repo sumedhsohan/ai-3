@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Question Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 600px;
+            max-width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .question-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f7f8fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .question {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .answer-section {
+            margin-top: 20px;
+        }
+
+        .answer-section textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .result {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interview Question Generator</h1>
+        
+        <div class="form-group">
+            <label for="company">Select Company:</label>
+            <select id="company" name="company">
+                <option value="Google">Google</option>
+                <option value="Microsoft">Microsoft</option>
+                <option value="Amazon">Amazon</option>
+                <option value="Facebook">Facebook</option>
+                <option value="Apple">Apple</option>
+                <option value="Netflix">Netflix</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="role">Select Role:</label>
+            <select id="role" name="role">
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="Data Scientist">Data Scientist</option>
+                <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                <option value="Frontend Developer">Frontend Developer</option>
+                <option value="Backend Developer">Backend Developer</option>
+                <option value="Full Stack Developer">Full Stack Developer</option>
+            </select>
+        </div>
+
+        <button id="generate-question-btn">Generate Question</button>
+
+        <div class="question-section" id="question-section">
+            <div class="question" id="question-text"></div>
+            <div class="answer-section">
+                <label for="answer">Your Answer:</label>
+                <textarea id="answer" placeholder="Type your answer here..."></textarea>
+                <button id="evaluate-answer-btn">Evaluate Answer</button>
+            </div>
+            <div class="result" id="feedback-result"></div>
+        </div>
+
+        <div class="footer">
+            <p>Need help? <a href="#">Contact Us</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("generate-question-btn").addEventListener("click", function() {
+            const company = document.getElementById("company").value;
+            const role = document.getElementById("role").value;
+
+            fetch("/ask_question", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ company, role })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const question = data.question;
+                document.getElementById("question-text").textContent = question;
+                document.getElementById("question-section").style.display = "block";
+            })
+            .catch(error => {
+                console.error("Error fetching question:", error);
+            });
+        });
+
+        document.getElementById("evaluate-answer-btn").addEventListener("click", function() {
+            const question = document.getElementById("question-text").textContent;
+            const userAnswer = document.getElementById("answer").value;
+
+            fetch("/evaluate_answer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question, answer: userAnswer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const feedback = data.feedback;
+                const correctAnswer = data.correct_answer;
+                document.getElementById("feedback-result").innerHTML = `<strong>Correct Answer:</strong> ${correctAnswer}<br><strong>Feedback:</strong> ${feedback}`;
+            })
+            .catch(error => {
+                console.error("Error evaluating answer:", error);
+            });
+        });
+    </script>
+</body>
+</html>
